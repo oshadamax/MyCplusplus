@@ -1,11 +1,15 @@
 #include "Game.h"
 #include "Player.h"
+#include "AI.h"
 
 #include <iostream>
 #include <string>
 
 
-Game::Game() {
+
+
+
+Game::Game() : ACTOR(0) {
 
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
@@ -52,9 +56,14 @@ void Game::gameLoop() {
 
   player = Player(name);
 
-  int x, i, j;
+  int x, i, j, a_func;
+  char c;
+  bool full = false;
 
-  while (!player.isWinner()) {
+  while (!player.isWinner() && !ai.isWinner() && !full) {
+
+
+    ACTOR = 0;
 
     showBoard();
 
@@ -68,20 +77,56 @@ void Game::gameLoop() {
 
     checkBoard();
 
+    if (!player.isWinner()) {
+
+      ACTOR = 1;
+
+      a_func = ai.move(Board);
+
+      if (a_func == -1)
+        full = true;
+      else {
+
+        bool b = false;
+
+        for (int i=0;i<3 && !b;i++)
+          for (int j=0;j<3 && !b;j++){
+
+            if (a_func == 0){
+              Board[i][j] = 'O';
+              b = true;
+            }
+
+            a_func--;
+
+          }
 
 
+        checkBoard();
 
+    }
 
   }
 
+}
+
   if (player.isWinner())
     std::cout << player.getName() << " WINS " << std::endl;
+  else if (ai.isWinner())
+    std::cout <<" COMPUTER WINS " << std::endl;
+  else if (full)
+    std::cout <<" NO WINNER " << std::endl;
 
-  std::cout << " Enter a key to continue...";
-  std::cin >> x;
+  showBoard();
 
+  std::cout << " Press ENTER to continue...";
+  std::cin >> c;
+
+  if (c == '\n')
+    return;
 
 }
+
 
 
 void Game::run() {
@@ -111,43 +156,64 @@ void Game::run() {
 
 void Game::checkBoard() {
 
-  if (Board[0][0] == Board[0][1] && Board[0][1] == Board[0][2] && Board[0][0]!='_'){
-    player.winner();
+  char c;
+
+  switch (ACTOR) {
+    case 0:
+      c = 'X';
+      break;
+    case 1:
+      c = 'O';
+      break;
+    default:
+      break;
+
+  }
+
+  if (Board[0][0] == Board[0][1] && Board[0][1] == Board[0][2] && Board[0][0]==c){
+    winMove();
     return;
   }
 
-  if (Board[1][0] == Board[1][1] && Board[1][1] == Board[1][2] && Board[1][0]!='_'){
-    player.winner();
+  if (Board[1][0] == Board[1][1] && Board[1][1] == Board[1][2] && Board[1][0]==c){
+    winMove();
     return;
   }
 
-  if (Board[2][0] == Board[2][1] && Board[2][1] == Board[2][2] && Board[2][0]!='_'){
-    player.winner();
+  if (Board[2][0] == Board[2][1] && Board[2][1] == Board[2][2] && Board[2][0]==c){
+    winMove();
     return;
   }
 
-  if (Board[0][0] == Board[1][0] && Board[1][0] == Board[2][0] && Board[0][0]!='_'){
-    player.winner();
+  if (Board[0][0] == Board[1][0] && Board[1][0] == Board[2][0] && Board[0][0]==c){
+    winMove();
     return;
   }
 
-  if (Board[0][1] == Board[1][1] && Board[1][1] == Board[2][1] && Board[0][1]!='_'){
-    player.winner();
+  if (Board[0][1] == Board[1][1] && Board[1][1] == Board[2][1] && Board[0][1]==c){
+    winMove();
     return;
   }
 
-  if (Board[0][2] == Board[1][2] && Board[1][2] == Board[2][2] && Board[0][2]!='_'){
-    player.winner();
+  if (Board[0][2] == Board[1][2] && Board[1][2] == Board[2][2] && Board[0][2]==c){
+    winMove();
     return;
   }
 
-  if (Board[0][0] == Board[1][1] && Board[1][1] == Board[2][2] && Board[0][0]!='_'){
-    player.winner();
+  if (Board[0][0] == Board[1][1] && Board[1][1] == Board[2][2] && Board[0][0]==c){
+    winMove();
     return;
   }
 
-  if (Board[0][2] == Board[1][1] && Board[1][1] == Board[2][0] && Board[0][2]!='_'){
-    player.winner();
+  if (Board[0][2] == Board[1][1] && Board[1][1] == Board[2][0] && Board[0][2]==c){
+    winMove();
     return;
   }
+}
+
+void Game::winMove() {
+  if (ACTOR == 0)
+    player.winner();
+  else
+   ai.winner();
 }
